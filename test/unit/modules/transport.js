@@ -104,7 +104,9 @@ peerStub;
 			}
 		};
 
-		peerStub = {};
+		peerStub = {
+			nonce: 'sYHEDBKcScaAAAYg'
+		};
 
 		swaggerHelper.getResolvedSwaggerSpec().then(resolvedSpec => {
 			defaultScope.swagger = {
@@ -718,14 +720,24 @@ peerAddressString;
 				});
 			});
 
-			describe('when peer is undefined', () => {
-				it('should call library.logger.debug with "Received transaction " + transaction.id + " from public client"');
+			describe('when peer is undefined', function () {
+
+				it('should call library.logger.debug with "Received transaction " + transaction.id + " from public client"', function (done) {
+					__private.receiveTransaction(transaction, undefined, 'This is a log message', function (err) {
+						expect(library.logger.debug.calledWith('Received transaction ' + transaction.id + ' from public client')).to.be.true;
+						done();
+					});
+				});
 			});
 
-			describe('when peer is defined', () => {
-				it('should call library.logger.debug with "Received transaction " + transaction.id + " from peer"');
+			describe('when peer is defined', function () {
 
-				it('should call library.logic.peers.peersManager.getAddress');
+				it('should call library.logger.debug with "Received transaction " + transaction.id + " from peer ..."', function (done) {
+					__private.receiveTransaction(transaction, peerStub, 'This is a log message', function (err) {
+						expect(library.logger.debug.calledWith('Received transaction ' + transaction.id + ' from peer ' + peerAddressString)).to.be.true;
+						done();
+					});
+				});
 
 				it('should call library.logic.peers.peersManager.getAddress with peer.nonce');
 			});
