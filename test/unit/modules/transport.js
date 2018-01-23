@@ -711,7 +711,12 @@ peerAddressString;
 				});
 			});
 
-			it('should call library.balancesSequence.add');
+			it('should call library.balancesSequence.add', function (done) {
+				__private.receiveTransaction(transaction, peerStub, 'This is a log message', function (err) {
+					expect(library.balancesSequence.add.called).to.be.true;
+					done();
+				});
+			});
 
 			describe('when peer is undefined', () => {
 				it('should call library.logger.debug with "Received transaction " + transaction.id + " from public client"');
