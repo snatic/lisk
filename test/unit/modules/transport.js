@@ -214,14 +214,14 @@ peerStub;
 				});
 			});
 
-			describe('when options.peer is defined', () => {
-				var removeSpy,
-peerData;
-				var restoreRewiredDeps;
+			describe('when options.peer is defined', function () {
+
+				var removeSpy, peerData;
+				var restoreNestedRewiredDeps;
 
 				beforeEach(done => {
 					removeSpy = sinonSandbox.spy();
-					restoreRewiredDeps = TransportModule.__set__({
+					restoreNestedRewiredDeps = TransportModule.__set__({
 						modules: {
 							peers: {
 								remove: removeSpy
@@ -235,8 +235,8 @@ peerData;
 					done();
 				});
 
-				afterEach(done => {
-					restoreRewiredDeps();
+				afterEach(function (done) {
+					restoreNestedRewiredDeps();
 					done();
 				});
 
@@ -282,8 +282,8 @@ peerData;
 				});
 			});
 
-			it('should call library.schema.validate with custom schema.signatures', done => {
-				var restoreRewiredDeps = TransportModule.__set__({
+			it('should call library.schema.validate with custom schema.signatures', function (done) {
+				var restoreDeps = TransportModule.__set__({
 					definitions: {
 						Signature: {
 							id: 'transport.signatures',
@@ -305,7 +305,7 @@ peerData;
 				}, () => {
 					expect(library.schema.validate.called).to.be.true;
 
-					restoreRewiredDeps();
+					restoreDeps();
 					done();
 				});
 			});
@@ -384,8 +384,8 @@ peerData;
 			});
 		});
 
-		describe('receiveSignature', () => {
-			var restoreRewiredDeps;
+		describe('receiveSignature', function () {
+			var restoreNestedRewiredDeps;
 
 			beforeEach(done => {
 				library = {
@@ -400,7 +400,7 @@ peerData;
 					}
 				};
 
-				restoreRewiredDeps = TransportModule.__set__({
+				restoreNestedRewiredDeps = TransportModule.__set__({
 					library: library,
 					modules: modules
 				});
@@ -408,8 +408,8 @@ peerData;
 				done();
 			});
 
-			afterEach(done => {
-				restoreRewiredDeps();
+			afterEach(function (done) {
+				restoreNestedRewiredDeps();
 				done();
 			});
 
@@ -469,9 +469,9 @@ peerData;
 			});
 		});
 
-		describe('receiveTransactions', () => {
-			var restoreRewiredDeps,
-query;
+		describe('receiveTransactions', function () {
+
+			var restoreNestedRewiredDeps, query;
 
 			beforeEach(done => {
 				library = {
@@ -489,7 +489,7 @@ query;
 					}
 				};
 
-				restoreRewiredDeps = TransportModule.__set__({
+				restoreNestedRewiredDeps = TransportModule.__set__({
 					library: library,
 					modules: modules
 				});
@@ -515,8 +515,8 @@ query;
 				done();
 			});
 
-			afterEach(done => {
-				restoreRewiredDeps();
+			afterEach(function (done) {
+				restoreNestedRewiredDeps();
 				done();
 			});
 
@@ -616,7 +616,9 @@ query;
 			var transaction,
 peerAddressString;
 
-			beforeEach(() => {
+			var transaction, peerAddressString, restoreNestedRewiredDeps;
+
+			beforeEach(function () {
 				transaction = {
 					id: '222675625422353767',
 					type: 0,
@@ -664,14 +666,19 @@ peerAddressString;
 					}
 				};
 
-				TransportModule.__set__({
+				restoreNestedRewiredDeps = TransportModule.__set__({
 					library: library,
 					modules: modules
 				});
 			});
 
-			it('should call library.logic.transaction.objectNormalize with transaction', done => {
-				__private.receiveTransaction(transaction, peerStub, 'This is a log message', () => {
+			afterEach(function (done) {
+				restoreNestedRewiredDeps();
+				done();
+			});
+
+			it('should call library.logic.transaction.objectNormalize with transaction', function (done) {
+				__private.receiveTransaction(transaction, peerStub, 'This is a log message', function (err) {
 					expect(library.logic.transaction.objectNormalize.calledWith(transaction)).to.be.true;
 					done();
 				});
