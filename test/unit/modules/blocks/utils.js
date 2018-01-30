@@ -13,33 +13,88 @@
  */
 'use strict';
 
+var rewire = require('rewire');
+var modulesLoader = require('../../../common/modulesLoader');
+var BlocksUtils= rewire('../../../../modules/blocks/utils.js');
+
+var viewRow_full_blocks_list = [{
+	b_id: '13068833527549895884',
+	b_height: 3,
+	t_id: '6950874693022090568',
+	t_type: 0
+}];
+
 describe('blocks/utils', function () {
+
+	var __private;
+	var library;
+	var blocksUtilsModule;
+	var dbStub;
+	var loggerStub;
+	var blockStub;
+	var transactionStub;
 
 	describe('Utils', function () {
 
+		before(function (done) {
+			dbStub = {
+				blocks: {
+					getIdSequence: sinonSandbox.stub().resolves(),
+					getHeightByLastId: sinonSandbox.stub().resolves(['1']),
+					loadLastBlock: sinonSandbox.stub().resolves(viewRow_full_blocks_list),
+					loadBlocksData: sinonSandbox.stub().resolves(viewRow_full_blocks_list),
+					aggregateBlocksReward: sinonSandbox.stub().resolves()
+				}
+			};
+
+			blockStub = {
+				dbRead: sinonSandbox.stub().withArgs(viewRow_full_blocks_list).returns({id: viewRow_full_blocks_list[0].b_id, height: viewRow_full_blocks_list[0].b_height})
+			};
+			transactionStub = {
+				dbRead: sinonSandbox.stub().withArgs(viewRow_full_blocks_list).returns({id: viewRow_full_blocks_list[0].t_id, type: viewRow_full_blocks_list[0].t_type})
+			};
+
+			loggerStub = {
+				trace: sinonSandbox.spy(),
+				info:  sinonSandbox.spy(),
+				error: sinonSandbox.spy()
+			};
+
+			blocksUtilsModule =  new BlocksUtils(loggerStub, blockStub, transactionStub, dbStub, modulesLoader.scope.dbSequence, modulesLoader.scope.genesisblock);
+			library = BlocksUtils.__get__('library');
+			__private = BlocksUtils.__get__('__private');
+			done();
+		});
+
 		describe('library', function () {
 
-			it('should assign logger');
+			it('should assign logger', function () {
+				expect(library.logger).to.eql(loggerStub);
+			});
 
-			it('should assign db');
+			it('should assign db', function () {
+				expect(library.db).to.eql(dbStub);
+			});
 
-			it('should assign dbSequence');
+			it('should assign dbSequence', function () {
+				expect(library.dbSequence).to.eql(modulesLoader.scope.dbSequence);
+			});
 
-			it('should assign genesisblock');
+			describe('should assign logic', function () {
 
-			describe('should assign logic',function () {
+				it('should assign block', function () {
+					expect(library.logic.block).to.eql(blockStub);
+				});
 
-				it('should assign block');
-
-				it('should assign transaction');
+				it('should assign transaction', function () {
+					expect(library.logic.transaction).to.eql(transactionStub);
+				});
 			});
 		});
 
-		it('should set self to this');
-
-		it('should call library.logger.trace with "Blocks->Utils: Submodule initialized."');
-
-		it('should return self');
+		it('should call library.logger.trace with "Blocks->Utils: Submodule initialized."', function () {
+			expect(loggerStub.trace.args[0][0]).to.equal('Blocks->Utils: Submodule initialized.');
+		});
 	});
 
 	describe('readDbRows', function () {
